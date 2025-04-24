@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Play Tic Tac Toe</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;600&display=swap" rel="stylesheet">
+    <style>
+        body {
+            background: #d4f4db;
+            color: #2f4f4f;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Poppins', sans-serif;
+            height: 100vh;
+            margin: 0;
+        }
+
+        h1 {
+            color: #4caf50;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+
+        #board {
+            display: grid;
+            grid-template-columns: repeat(3, 100px);
+            grid-template-rows: repeat(3, 100px);
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .cell {
+            width: 100px;
+            height: 100px;
+            background: #a8e6cf;
+            border: 2px solid #4caf50;
+            font-size: 2.5rem;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            user-select: none;
+            transition: background 0.2s;
+        }
+
+        .cell:hover {
+            background: #81c784;
+        }
+
+        #status {
+            margin-top: 20px;
+            font-size: 1.2rem;
+            font-weight: 500;
+        }
+
+        #resetBtn {
+            margin-top: 10px;
+            padding: 10px 20px;
+            font-size: 1rem;
+            background: #81d4fa;
+            color: #fff;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+            font-family: 'Poppins', sans-serif;
+            transition: background 0.3s;
+        }
+
+        #resetBtn:hover {
+            background: #64b5f6;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Tic Tac Toe Game</h1>
+    <div id="board"></div>
+    <div id="status">Your Turn (X)</div>
+    <button id="resetBtn">Reset Game</button>
+
+    <script>
+        const board = document.getElementById("board");
+        const statusText = document.getElementById("status");
+        const resetBtn = document.getElementById("resetBtn");
+
+        let cells = Array(9).fill("");
+        let player = "X";
+        let ai = "O";
+        let gameOver = false;
+
+        const winCombos = [
+            [0,1,2], [3,4,5], [6,7,8],
+            [0,3,6], [1,4,7], [2,5,8],
+            [0,4,8], [2,4,6]
+        ];
+
+        function drawBoard() {
+            board.innerHTML = "";
+            cells.forEach((val, i) => {
+                const cell = document.createElement("div");
+                cell.className = "cell";
+                cell.textContent = val;
+                cell.addEventListener("click", () => handlePlayerMove(i));
+                board.appendChild(cell);
+            });
+        }
+
+        function handlePlayerMove(index) {
+            if (cells[index] !== "" || gameOver) return;
+            cells[index] = player;
+            drawBoard();
+            if (checkWin(player)) {
+                statusText.textContent = "You Win! 🎉";
+                gameOver = true;
+                return;
+            }
+            if (isDraw()) {
+                statusText.textContent = "It's a Draw 😐";
+                gameOver = true;
+                return;
+            }
+
+            statusText.textContent = "Computer's Turn (O)";
+            setTimeout(computerMove, 500); // Small delay for realism
+        }
+
+        function computerMove() {
+            if (gameOver) return;
+            let emptyIndices = cells
+                .map((val, idx) => val === "" ? idx : null)
+                .filter(val => val !== null);
+
+            if (emptyIndices.length === 0) return;
+
+            let randomIndex = emptyIndices[Math.floor(Math.random() * emptyIndices.length)];
+            cells[randomIndex] = ai;
+            drawBoard();
+
+            if (checkWin(ai)) {
+                statusText.textContent = "Computer Wins! 💻";
+                gameOver = true;
+                return;
+            }
+            if (isDraw()) {
+                statusText.textContent = "It's a Draw 😐";
+                gameOver = true;
+                return;
+            }
+
+            statusText.textContent = "Your Turn (X)";
+        }
+
+        function checkWin(player) {
+            return winCombos.some(combo => {
+                return combo.every(i => cells[i] === player);
+            });
+        }
+
+        function isDraw() {
+            return cells.every(cell => cell !== "");
+        }
+
+        resetBtn.addEventListener("click", () => {
+            cells = Array(9).fill("");
+            gameOver = false;
+            statusText.textContent = "Your Turn (X)";
+            drawBoard();
+        });
+
+        drawBoard();
+    </script>
+</body>
+</html>
